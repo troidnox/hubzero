@@ -515,9 +515,6 @@ function MacLib:Window(Settings)
 	informationGroupUIListLayout.Parent = informationGroup
 
 	local userId = LocalPlayer.UserId
-	local thumbType = Enum.ThumbnailType.AvatarBust
-	local thumbSize = Enum.ThumbnailSize.Size48x48
-	local headshotImage, isReady = Players:GetUserThumbnailAsync(userId, thumbType, thumbSize)
 
 	local headshot = Instance.new("ImageLabel")
 	headshot.Name = "Headshot"
@@ -526,7 +523,14 @@ function MacLib:Window(Settings)
 	headshot.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	headshot.BorderSizePixel = 0
 	headshot.Size = UDim2.fromOffset(32, 32)
-	headshot.Image = (isReady and headshotImage) or "rbxassetid://0"
+	do
+		local _logoId = "rbxassetid://83109184888967"
+		if getcustomasset and isfile and isfile("ZeroHub/logo.png") then
+			local ok, ca = pcall(getcustomasset, "ZeroHub/logo.png")
+			if ok and ca then _logoId = ca end
+		end
+		headshot.Image = _logoId
+	end
 
 	local uICorner3 = Instance.new("UICorner")
 	uICorner3.Name = "UICorner"
@@ -558,7 +562,8 @@ function MacLib:Window(Settings)
 		Enum.FontWeight.SemiBold,
 		Enum.FontStyle.Normal
 	)
-	displayName.Text = LocalPlayer.DisplayName
+	displayName.RichText = true
+	displayName.Text = "<font color=\"rgb(178,120,255)\">Zero</font> <font color=\"rgb(138,79,255)\">Hub</font>"
 	displayName.TextColor3 = Color3.fromRGB(255, 255, 255)
 	displayName.TextSize = 13
 	displayName.TextTransparency = 0.1
@@ -592,7 +597,7 @@ function MacLib:Window(Settings)
 		Enum.FontWeight.SemiBold,
 		Enum.FontStyle.Normal
 	)
-	username.Text = "@" .. LocalPlayer.Name
+	username.Text = "v2.1  ·  VV Ultimatum"
 	username.TextColor3 = Color3.fromRGB(255, 255, 255)
 	username.TextSize = 12
 	username.TextTransparency = 0.7

@@ -1630,6 +1630,68 @@ function MacLib:Window(Settings)
 				sectionUIPadding.PaddingTop = UDim.new(0, 22)
 				sectionUIPadding.Parent = section
 
+				-- Optional icon + name header
+				if Settings.Name or Settings.Image then
+					local headerRow = Instance.new("Frame")
+					headerRow.Name = "SectionHeader"
+					headerRow.BackgroundTransparency = 1
+					headerRow.BorderSizePixel = 0
+					headerRow.Size = UDim2.new(1, 0, 0, 18)
+					headerRow.LayoutOrder = -1
+					headerRow.Parent = section
+
+					local headerList = Instance.new("UIListLayout")
+					headerList.FillDirection = Enum.FillDirection.Horizontal
+					headerList.VerticalAlignment = Enum.VerticalAlignment.Center
+					headerList.Padding = UDim.new(0, 6)
+					headerList.SortOrder = Enum.SortOrder.LayoutOrder
+					headerList.Parent = headerRow
+
+					if Settings.Image then
+						local _icon = resolveIcon(Settings.Image)
+						if _icon then
+							local iconImg = Instance.new("ImageLabel")
+							iconImg.Name = "SectionIcon"
+							iconImg.Image = _icon.Url
+							iconImg.ImageRectOffset = _icon.ImageRectOffset
+							iconImg.ImageRectSize = _icon.ImageRectSize
+							iconImg.ImageTransparency = 0.5
+							iconImg.BackgroundTransparency = 1
+							iconImg.BorderSizePixel = 0
+							iconImg.Size = UDim2.fromOffset(14, 14)
+							iconImg.LayoutOrder = 0
+							iconImg.Parent = headerRow
+						end
+					end
+
+					if Settings.Name then
+						local headerLbl = Instance.new("TextLabel")
+						headerLbl.Name = "SectionName"
+						headerLbl.FontFace = Font.new(assets.interFont, Enum.FontWeight.SemiBold)
+						headerLbl.Text = Settings.Name
+						headerLbl.RichText = true
+						headerLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+						headerLbl.TextSize = 12
+						headerLbl.TextTransparency = 0.45
+						headerLbl.TextXAlignment = Enum.TextXAlignment.Left
+						headerLbl.AutomaticSize = Enum.AutomaticSize.XY
+						headerLbl.BackgroundTransparency = 1
+						headerLbl.BorderSizePixel = 0
+						headerLbl.LayoutOrder = 1
+						headerLbl.Parent = headerRow
+					end
+
+					-- divider under header
+					local divLine = Instance.new("Frame")
+					divLine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					divLine.BackgroundTransparency = 0.92
+					divLine.BorderSizePixel = 0
+					divLine.Size = UDim2.new(1, 0, 0, 1)
+					divLine.LayoutOrder = -1
+					divLine.Parent = section
+				end
+
+
 				function SectionFunctions:Button(Settings, Flag)
 					local ButtonFunctions = {Settings = Settings}
 					local button = Instance.new("Frame")

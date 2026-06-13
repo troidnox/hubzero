@@ -543,14 +543,7 @@ function MacLib:Window(Settings)
 	headshot.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	headshot.BorderSizePixel = 0
 	headshot.Size = UDim2.fromOffset(32, 32)
-	do
-		local _logoId = "rbxassetid://83109184888967"
-		if getcustomasset and isfile and isfile("ZeroHub/logo.png") then
-			local ok, ca = pcall(getcustomasset, "ZeroHub/logo.png")
-			if ok and ca then _logoId = ca end
-		end
-		headshot.Image = _logoId
-	end
+	headshot.Image = "rbxassetid://83109184888967"
 
 	local uICorner3 = Instance.new("UICorner")
 	uICorner3.Name = "UICorner"
@@ -5454,17 +5447,7 @@ function MacLib:Window(Settings)
 	end
 
 	local function _SetUserInfoState(State)
-		if State then
-			headshot.Image = (isReady and headshotImage) or "rbxassetid://0"
-			username.Text = "@" .. LocalPlayer.Name
-			displayName.Text = LocalPlayer.DisplayName
-		else
-			headshot.Image = assets.userInfoBlurred
-			local nameLength = #LocalPlayer.Name
-			local displayNameLength = #LocalPlayer.DisplayName
-			username.Text = "@" .. string.rep(".", nameLength)
-			displayName.Text = string.rep(".", displayNameLength)
-		end
+		-- logo and text are static, nothing to toggle
 	end
 
 	local showUserInfo

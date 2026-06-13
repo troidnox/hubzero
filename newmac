@@ -45,16 +45,21 @@ local assets = {
 	sliderhead = "rbxassetid://18772834246",
 }
 
---// Lucide icon support via spritesheet module
-local _lucideOk, _lucide = pcall(function()
-	return loadstring(game:HttpGet(
-		"https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua"
-	))()
-end)
+--// Lucide icon support — lazy loaded on first resolveIcon call
+local _lucideOk = nil
+local _lucide = nil
+local function _loadLucide()
+	if _lucideOk ~= nil then return end
+	_lucideOk, _lucide = pcall(function()
+		return loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua"
+		))()
+	end)
+end
 
-MacLib.Icons = _lucideOk and _lucide or nil
+MacLib.Icons = nil
 MacLib.Accent = Color3.fromRGB(138, 79, 255)
-MacLib._accentElements = {} -- {type, instance}
+MacLib._accentElements = {}
 
 function MacLib:SetAccent(color)
 	MacLib.Accent = color
@@ -80,7 +85,9 @@ local function resolveIcon(name)
 		return { Url = "rbxassetid://" .. name, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero }
 	end
 	-- lucide name lookup
+	_loadLucide()
 	if _lucideOk and _lucide then
+		MacLib.Icons = _lucide
 		local ok, icon = pcall(_lucide.GetAsset, name)
 		if ok and icon then return icon end
 	end

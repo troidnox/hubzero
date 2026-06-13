@@ -53,6 +53,22 @@ local _lucideOk, _lucide = pcall(function()
 end)
 
 MacLib.Icons = _lucideOk and _lucide or nil
+MacLib.Accent = Color3.fromRGB(138, 79, 255)
+MacLib._accentElements = {} -- {type, instance}
+
+function MacLib:SetAccent(color)
+	MacLib.Accent = color
+	local ti = TweenService:Create
+	local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
+	for _, entry in ipairs(MacLib._accentElements) do
+		local ok, inst = pcall(function() return entry.inst end)
+		if ok and inst and inst.Parent then
+			if entry.prop then
+				TweenService:Create(inst, info, { [entry.prop] = color }):Play()
+			end
+		end
+	end
+end
 
 local function resolveIcon(name)
 	if not name or name == "" then return nil end
@@ -1702,25 +1718,37 @@ function MacLib:Window(Settings)
 					local button = Instance.new("Frame")
 					button.Name = "Button"
 					button.AutomaticSize = Enum.AutomaticSize.Y
-					button.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-					button.BackgroundTransparency = 1
-					button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+					button.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+					button.BackgroundTransparency = 0
 					button.BorderSizePixel = 0
-					button.Size = UDim2.new(1, 0, 0, 38)
+					button.Size = UDim2.new(1, 0, 0, 36)
 					button.Parent = section
+
+					local buttonCorner = Instance.new("UICorner")
+					buttonCorner.CornerRadius = UDim.new(0, 6)
+					buttonCorner.Parent = button
+
+					local buttonStroke = Instance.new("UIStroke")
+					buttonStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+					buttonStroke.Color = Color3.fromRGB(255, 255, 255)
+					buttonStroke.Transparency = 0.92
+					buttonStroke.Parent = button
+
+					local buttonPad = Instance.new("UIPadding")
+					buttonPad.PaddingLeft = UDim.new(0, 12)
+					buttonPad.PaddingRight = UDim.new(0, 12)
+					buttonPad.Parent = button
 
 					local buttonInteract = Instance.new("TextButton")
 					buttonInteract.Name = "ButtonInteract"
-					buttonInteract.FontFace = Font.new(assets.interFont)
+					buttonInteract.FontFace = Font.new(assets.interFont, Enum.FontWeight.Medium)
 					buttonInteract.RichText = true
 					buttonInteract.TextColor3 = Color3.fromRGB(255, 255, 255)
 					buttonInteract.TextSize = 13
-					buttonInteract.TextTransparency = 0.5
+					buttonInteract.TextTransparency = 0.2
 					buttonInteract.TextTruncate = Enum.TextTruncate.AtEnd
 					buttonInteract.TextXAlignment = Enum.TextXAlignment.Left
-					buttonInteract.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					buttonInteract.BackgroundTransparency = 1
-					buttonInteract.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					buttonInteract.BorderSizePixel = 0
 					buttonInteract.Size = UDim2.fromScale(1, 1)
 					buttonInteract.Parent = button
@@ -1729,55 +1757,46 @@ function MacLib:Window(Settings)
 					local buttonImage = Instance.new("ImageLabel")
 					buttonImage.Name = "ButtonImage"
 					buttonImage.Image = assets.buttonImage
+					buttonImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
 					buttonImage.ImageTransparency = 0.5
 					buttonImage.AnchorPoint = Vector2.new(1, 0.5)
-					buttonImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 					buttonImage.BackgroundTransparency = 1
-					buttonImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
 					buttonImage.BorderSizePixel = 0
-					buttonImage.Position = UDim2.fromScale(1, 0.5)
-					buttonImage.Size = UDim2.fromOffset(15, 15)
+					buttonImage.Position = UDim2.new(1, -12, 0.5, 0)
+					buttonImage.Size = UDim2.fromOffset(14, 14)
 					buttonImage.Parent = button
 
-					local TweenSettings = {
-						DefaultTransparency = 0.5,
-						HoverTransparency = 0.3,
-
-						EasingStyle = Enum.EasingStyle.Sine
-					}
+					local _idle   = Color3.fromRGB(32, 32, 32)
+					local _hover  = Color3.fromRGB(44, 44, 44)
+					local _click  = Color3.fromRGB(55, 55, 55)
+					local _ti     = TweenInfo.new(0.15, Enum.EasingStyle.Sine)
 
 					local function ChangeState(State)
 						if State == "Idle" then
-							Tween(buttonInteract, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
-								TextTransparency = TweenSettings.DefaultTransparency
-							}):Play()
-							Tween(buttonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
-								ImageTransparency = TweenSettings.DefaultTransparency
-							}):Play()
+							Tween(button, _ti, { BackgroundColor3 = _idle }):Play()
+							Tween(buttonInteract, _ti, { TextTransparency = 0.2 }):Play()
+							Tween(buttonImage, _ti, { ImageTransparency = 0.5 }):Play()
+							Tween(buttonStroke, _ti, { Transparency = 0.92 }):Play()
 						elseif State == "Hover" then
-							Tween(buttonInteract, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
-								TextTransparency = TweenSettings.HoverTransparency
-							}):Play()
-							Tween(buttonImage, TweenInfo.new(0.2, TweenSettings.EasingStyle), {
-								ImageTransparency = TweenSettings.HoverTransparency
-							}):Play()
+							Tween(button, _ti, { BackgroundColor3 = _hover }):Play()
+							Tween(buttonInteract, _ti, { TextTransparency = 0.0 }):Play()
+							Tween(buttonImage, _ti, { ImageTransparency = 0.3 }):Play()
+							Tween(buttonStroke, _ti, { Transparency = 0.85 }):Play()
+						elseif State == "Click" then
+							Tween(button, _ti, { BackgroundColor3 = _click }):Play()
 						end
 					end
 
-					local function Callback()
+					buttonInteract.MouseEnter:Connect(function() ChangeState("Hover") end)
+					buttonInteract.MouseLeave:Connect(function() ChangeState("Idle") end)
+					buttonInteract.MouseButton1Down:Connect(function() ChangeState("Click") end)
+					buttonInteract.MouseButton1Up:Connect(function() ChangeState("Hover") end)
+					buttonInteract.MouseButton1Click:Connect(function()
 						if ButtonFunctions.Settings.Callback then
 							ButtonFunctions.Settings.Callback()
 						end
-					end
-
-					buttonInteract.MouseEnter:Connect(function()
-						ChangeState("Hover")
-					end)
-					buttonInteract.MouseLeave:Connect(function()
-						ChangeState("Idle")
 					end)
 
-					buttonInteract.MouseButton1Click:Connect(Callback)
 					function ButtonFunctions:UpdateName(Name)
 						buttonInteract.Text = Name
 					end
@@ -1785,11 +1804,10 @@ function MacLib:Window(Settings)
 						button.Visible = State
 					end
 
-					if Flag then
-						MacLib.Options[Flag] = ButtonFunctions
-					end
+					if Flag then MacLib.Options[Flag] = ButtonFunctions end
 					return ButtonFunctions
 				end
+
 
 				function SectionFunctions:Toggle(Settings, Flag)
 					local ToggleFunctions = { Settings = Settings, IgnoreConfig = false, Class = "Toggle" }
@@ -1828,6 +1846,9 @@ function MacLib:Window(Settings)
 					toggle1.Name = "Toggle"
 					toggle1.Image = assets.toggleBackground
 					toggle1.ImageColor3 = Color3.fromRGB(87, 86, 86)
+
+					-- register for accent updates
+					table.insert(MacLib._accentElements, { inst=toggle1, prop=nil }) -- handled in NewState
 					toggle1.AutoButtonColor = false
 					toggle1.AnchorPoint = Vector2.new(1, 0.5)
 					toggle1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -1881,6 +1902,7 @@ function MacLib:Window(Settings)
 						local position = State and TweenSettings.EnabledPosition or TweenSettings.DisabledPosition
 
 						Tween(toggle1, TweenSettings.Info, {
+							ImageColor3 = State and MacLib.Accent or Color3.fromRGB(87, 86, 86),
 							ImageTransparency = transparencyValues[1]
 						}):Play()
 

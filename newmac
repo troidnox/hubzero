@@ -57,34 +57,14 @@ local function _loadLucide()
 	end)
 end
 
-MacLib.Icons = nil
-MacLib.Accent = Color3.fromRGB(138, 79, 255)
-MacLib._accentElements = {}
-
-function MacLib:SetAccent(color)
-	MacLib.Accent = color
-	local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
-	for _, entry in ipairs(MacLib._accentElements) do
-		local ok, inst = pcall(function() return entry.inst end)
-		if ok and inst and inst.Parent then
-			if entry.prop then
-				TweenService:Create(inst, info, { [entry.prop] = color }):Play()
-			end
-		end
-	end
-end
-
 local function resolveIcon(name)
 	if not name or name == "" then return nil end
-	-- already a full asset URL — pass through
 	if name:find("rbxassetid://") or name:find("rbxthumb://") or name:find("http") then
 		return { Url = name, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero }
 	end
-	-- numeric id shorthand
 	if tonumber(name) then
 		return { Url = "rbxassetid://" .. name, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero }
 	end
-	-- lucide name lookup
 	_loadLucide()
 	if _lucideOk and _lucide then
 		MacLib.Icons = _lucide
@@ -118,6 +98,24 @@ end
 
 --// Library Functions
 function MacLib:Window(Settings)
+	-- init accent system once
+	if not MacLib._accentElements then
+		MacLib.Icons = nil
+		MacLib.Accent = Color3.fromRGB(138, 79, 255)
+		MacLib._accentElements = {}
+		function MacLib:SetAccent(color)
+			MacLib.Accent = color
+			local info = TweenInfo.new(0.2, Enum.EasingStyle.Sine)
+			for _, entry in ipairs(MacLib._accentElements) do
+				pcall(function()
+					if entry.inst and entry.inst.Parent and entry.prop then
+						TweenService:Create(entry.inst, info, { [entry.prop] = color }):Play()
+					end
+				end)
+			end
+		end
+	end
+
 	local WindowFunctions = {Settings = Settings}
 	if Settings.AcrylicBlur ~= nil then
 		acrylicBlur = Settings.AcrylicBlur

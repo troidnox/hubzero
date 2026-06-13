@@ -45,6 +45,34 @@ local assets = {
 	sliderhead = "rbxassetid://18772834246",
 }
 
+--// Lucide icon support via spritesheet module
+local _lucideOk, _lucide = pcall(function()
+	return loadstring(game:HttpGet(
+		"https://raw.githubusercontent.com/deividcomsono/lucide-roblox-direct/refs/heads/main/source.lua"
+	))()
+end)
+
+MacLib.Icons = _lucideOk and _lucide or nil
+
+local function resolveIcon(name)
+	if not name or name == "" then return nil end
+	-- already a full asset URL — pass through
+	if name:find("rbxassetid://") or name:find("rbxthumb://") or name:find("http") then
+		return { Url = name, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero }
+	end
+	-- numeric id shorthand
+	if tonumber(name) then
+		return { Url = "rbxassetid://" .. name, ImageRectOffset = Vector2.zero, ImageRectSize = Vector2.zero }
+	end
+	-- lucide name lookup
+	if _lucideOk and _lucide then
+		local ok, icon = pcall(_lucide.GetAsset, name)
+		if ok and icon then return icon end
+	end
+	return nil
+end
+
+
 --// Functions
 local function GetGui()
 	local newGui = Instance.new("ScreenGui")
@@ -1427,16 +1455,21 @@ function MacLib:Window(Settings)
 			local tabImage
 
 			if Settings.Image then
-				tabImage = Instance.new("ImageLabel")
-				tabImage.Name = "TabImage"
-				tabImage.Image = Settings.Image
-				tabImage.ImageTransparency = 0.5
-				tabImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-				tabImage.BackgroundTransparency = 1
-				tabImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
-				tabImage.BorderSizePixel = 0
-				tabImage.Size = UDim2.fromOffset(18, 18)
-				tabImage.Parent = tabSwitcher
+				local _icon = resolveIcon(Settings.Image)
+				if _icon then
+					tabImage = Instance.new("ImageLabel")
+					tabImage.Name = "TabImage"
+					tabImage.Image = _icon.Url
+					tabImage.ImageRectOffset = _icon.ImageRectOffset
+					tabImage.ImageRectSize = _icon.ImageRectSize
+					tabImage.ImageTransparency = 0.5
+					tabImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					tabImage.BackgroundTransparency = 1
+					tabImage.BorderColor3 = Color3.fromRGB(0, 0, 0)
+					tabImage.BorderSizePixel = 0
+					tabImage.Size = UDim2.fromOffset(18, 18)
+					tabImage.Parent = tabSwitcher
+				end
 			end
 
 			local tabSwitcherName = Instance.new("TextLabel")
